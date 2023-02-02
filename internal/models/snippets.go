@@ -1,5 +1,10 @@
 package models
 
+import (
+	"database/sql"
+	"time"
+)
+
 type Snippet struct {
   ID int
   Title string
