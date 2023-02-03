@@ -8,6 +8,7 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 	"snippetbox.qcollins.net/internal/models"
 )
@@ -17,11 +18,11 @@ type application struct {
   infoLog *log.Logger
   snippets *models.SnippetModel
   templateCache map[string]*template.Template
+  formDecoder *form.Decoder
 }
 
 func main() {
   addr := flag.String("addr", ":4000", "HTTP network address")
-
   dsn := flag.String("dsn", "web:Minitri5fire!@/snippetbox?parseTime=true", "MySQL data source name")
 
   flag.Parse()
@@ -33,7 +34,6 @@ func main() {
   if err != nil {
     errorLog.Fatal(err)
   }
-
   defer db.Close()
 
   templateCache, err := newTemplateCache()
@@ -41,11 +41,14 @@ func main() {
     errorLog.Fatal(err)
   }
 
+  formDecoder := form.NewDecoder()
+
   app := &application{
     errorLog: errorLog,
     infoLog: infoLog,
     snippets: &models.SnippetModel{DB: db},
     templateCache: templateCache,
+    formDecoder: formDecoder,
   }
 
   srv := &http.Server{
