@@ -172,7 +172,6 @@ for _, page := range pages {
 ts, err := template.ParseFiles(files...)
 cache[name] = ts
 }
-
 ```
 - Add template cache to application struct for dependency injection
 - Initialize a new template cache
@@ -185,6 +184,12 @@ w.WriteHeader(status)
 buf.WriteTo(w)
 ```
 ### Middleware
+- Create middleware functions that accept **http.Handler** and return **http.Handler** by calling **next** handler forming a closure
+- Middleware chain, any code before `next.ServeHTTP(w, r)` is called on the way down the chain, and after is called on the way up
+```
+logRequest ↔ secureHeaders ↔ servemux ↔ myMiddleware ↔ application handler
+```
+- `return` before a `next.ServeHTTP(w, r)` will stop the chain from being executed.
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
@@ -287,6 +292,26 @@ buf.WriteTo(w)
   - These steps must happen before you parse the templates
   - Custom template functions can return only one value and optionally error as a second value
 - `{{.Created | humanDate}}` and `{{humanDate .Created}}` are equivalent
+- Middleware design patterns:
+```
+func myMiddleware(next http.Handler) http.Handler {
+    fn := func(w http.ResponseWriter, r *http.Request) {
+        // TODO: Execute our middleware logic here...
+        next.ServeHTTP(w, r)
+    }
+    return http.HandlerFunc(fn)
+}
+```
+Or as a different pattern:
+```
+func myMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // TODO: Execute our middleware logic here...
+        next.ServeHTTP(w, r)
+    })
+}
+```
+-
 
 
 ## Commands Covered
