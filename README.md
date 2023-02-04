@@ -2,8 +2,6 @@
 # Notes
 
 ## Project tree
-
-.
  * [cmd](./cmd)
    * [web](./cmd/web)
    * [context.go](./cmd/web/context.go)
@@ -63,7 +61,6 @@
      * [teardown.sql](./internal/models/testdata/teardown.sql)
    * [testutils_test.go](./internal/models/testutils_test.go)
    * [users_test.go](./internal/models/users_test.go)
- * [\](./\)
  * [README.md](./README.md)
 
 ## Overview of architecture and design decisions
