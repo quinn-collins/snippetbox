@@ -3,6 +3,7 @@
 
 ## Project tree
 > Inspired by: https://peter.bourgon.org/go-best-practices-2016/#repository-structure
+
 > TODO: READ his recommended links: 
 > https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
 > https://github.com/thockin/go-build-template
