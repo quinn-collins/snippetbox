@@ -84,9 +84,16 @@
 - Static content served with `http.FileServer`
 - Pass the fileserver into mux to create a route at `/static/`
 - Use static content in templates by adding links in the `head` of the HTML document+
-### Configuration
--
-### Error Handling
+### Managing Configuration Settings
+#### Environment Variables and Command-line Flags
+- Example command: `go run ./cmd/web -addr=":80"`
+- `addr := flag.String("addr", ":4000", "HTTP network address")`
+- `flag.Parse()`
+- `err := http.ListenAndServe(*addr, mux)
+- You can use environment variables while starting the application
+#### Leveled Logging
+- Prefix information messages with **INFO** and error messages with **ERROR**
+#### Centralized Error Handling
 -
 
 ## Notes
@@ -148,7 +155,9 @@
 
 
 ## Commands Covered
-`go run .`
-`go run main.go`
-`go run snippetbox.qcollins.net`
-`go run ./cmd/web`
+`go run .`\
+`go run main.go`\
+`go run snippetbox.qcollins.net`\
+`go run ./cmd/web`\
+`go run ./cmd/web -addr=":80"`\
+`go run ./cmd/web -help`
