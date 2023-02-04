@@ -98,6 +98,12 @@
 - Can redirect standard out and standard error streams to different places from the start of the application
 - `go run ./cmd/web >>/tmp/info.log 2>>/tmp/error.log`
 - Create a new http.Server struct with our new error logger
+### Database-driven response
+#### Setting up database and connection
+- Installed MySql locally
+- Scaffolded the database. Created database added snippets table with some data.
+- Created a user to restrict the amount of access our application has while running.
+- Installed a [driver](https://github.com/go-sql-driver/mysql)
 ```
 srv := &http.Server{
   Addr: *addr,
@@ -105,9 +111,30 @@ srv := &http.Server{
   Handler: mux,
 }
 ```
-- 
+### Dependency Injection
+- Put dependencies in a custom application struct
+- Define handler functions as methods against application struct
+- Initialize instance of application struct
+- Pass application struct methods(handlers) into mux
+- Current Dependencies:
+```
+type application struct {
+  errorLog *log.Logger
+  infoLog *log.Logger
+  snippets models.SnippetModelInterface
+  users models.UserModelInterface
+  templateCache map[string]*template.Template
+  formDecoder *form.Decoder
+  sessionManager *scs.SessionManager
+}
+```
 ### Centralized Error Handling
--
+- Move error handling into helper methods on the application struct
+```
+func (app *application) serverError(w http.ResponseWriter, err error) {}
+func (app *application) clientError(w http.ResponseWriter, status int) {}
+func (app *application) notFound(w http.ResponseWriter) {}
+```
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
@@ -165,6 +192,12 @@ srv := &http.Server{
 - All incoming HTTP requests are served in their own goroutine
   - Code called in or by your handlers will most likely be running concurrently
   - Be aware of race conditions when accessing shared resources from handlers
+- Custom loggers created by `log.New()` are concurrency-safe
+  - If multiple loggers are writing to the same destination you need to make sure underlying `Write()` method is safe for concurrent use
+- Use closures for dependency injection when handlers are spread across mulitiple packages
+- Can use `debug.Stack()` to get a stack trace for current goroutine
+- Can use `http.StatusTexT()` to generate a human-friendly text representation of a given HTTP status code
+- Error logger's `Output()` function may need frame depth set to return correct stack trace of where the error originated
 
 
 ## Commands Covered
@@ -174,4 +207,7 @@ srv := &http.Server{
 `go run ./cmd/web`\
 `go run ./cmd/web -addr=":80"`\
 `go run ./cmd/web -help`\
-`go run ./cmd/web >>/tmp/info.log 2>>/tmp/error.log`
+`go run ./cmd/web >>/tmp/info.log 2>>/tmp/error.log`\
+`go get github.com/go-sql-driver/mysql@v1`\
+`go get github.com/go-sql-driver/mysql`\
+`go get github.com/go-sql-driver/mysql@v1.0.3`\
