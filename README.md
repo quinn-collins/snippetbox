@@ -2,6 +2,70 @@
 # Notes
 
 ## Project tree
+.
+├── README.md
+├── \
+├── cmd
+│   └── web
+│       ├── context.go
+│       ├── handlers.go
+│       ├── handlers_test.go
+│       ├── helpers.go
+│       ├── main.go
+│       ├── middleware.go
+│       ├── middleware_test.go
+│       ├── routes.go
+│       ├── templates.go
+│       ├── templates_test.go
+│       └── testutils_test.go
+├── go.mod
+├── go.sum
+├── internal
+│   ├── assert
+│   │   └── assert.go
+│   ├── models
+│   │   ├── errors.go
+│   │   ├── mocks
+│   │   │   ├── snippets.go
+│   │   │   └── users.go
+│   │   ├── snippets.go
+│   │   ├── testdata
+│   │   │   ├── setup.sql
+│   │   │   └── teardown.sql
+│   │   ├── testutils_test.go
+│   │   ├── users.go
+│   │   └── users_test.go
+│   └── validator
+│       └── validator.go
+├── tls
+│   ├── cert.pem
+│   └── key.pem
+└── ui
+    ├── efs.go
+    ├── html
+    │   ├── base.tmpl.html
+    │   ├── pages
+    │   │   ├── create.tmpl.html
+    │   │   ├── home.tmpl.html
+    │   │   ├── login.tmpl.html
+    │   │   ├── signup.tmpl.html
+    │   │   └── view.tmpl.html
+    │   └── partials
+    │       └── nav.tmpl.html
+    └── static
+        ├── css
+        │   ├── index.html
+        │   └── main.css
+        ├── img
+        │   ├── favicon.ico
+        │   ├── index.html
+        │   └── logo.png
+        ├── index.html
+        └── js
+            ├── index.html
+            └── main.js
+
+## Project tree
  * [cmd](./cmd)
    * [web](./cmd/web)
    * [context.go](./cmd/web/context.go)
