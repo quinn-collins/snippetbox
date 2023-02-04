@@ -1,6 +1,13 @@
 # 'Let's Go' book by Alex Edwards
 Notes by Quinn Collins
 
+## Routes
+
+| Method  | Pattern | Handler | Action |
+| ------------- | ------------- | ------------- | ------------- |
+| GET | / | home | Display the home page |
+| GET | snippet/view/:id | snippetView | Display a specific snippet |
+
 ## Project tree
 ```
 .
