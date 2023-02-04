@@ -3,9 +3,9 @@
 ## Project tree
 > Inspired by: https://peter.bourgon.org/go-best-practices-2016/#repository-structure
 
-> TODO: READ his recommended links for new best practices:\
-> https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1\
-> https://github.com/thockin/go-build-template\
+> TODO: READ his recommended links for new best practices \
+> - https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1 \
+> - https://github.com/thockin/go-build-template \
 ```
 .
 ├── README.md
