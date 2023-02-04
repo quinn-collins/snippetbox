@@ -186,10 +186,15 @@ buf.WriteTo(w)
 ### Middleware
 - Create middleware functions that accept **http.Handler** and return **http.Handler** by calling **next** handler forming a closure
 - Middleware chain, any code before `next.ServeHTTP(w, r)` is called on the way down the chain, and after is called on the way up
+- Panic recovery to send a neat error back on a panic within a request lifetime in a goroutine
+- Log Requests
+- We used lightweight [justinas/alice](https://github.com/justinas/alice) to compose our middleware chain
 ```
-logRequest ↔ secureHeaders ↔ servemux ↔ myMiddleware ↔ application handler
+recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ myMiddleware ↔ application handler
 ```
 - `return` before a `next.ServeHTTP(w, r)` will stop the chain from being executed.
+### Advanced Routing
+- 
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
@@ -311,7 +316,7 @@ func myMiddleware(next http.Handler) http.Handler {
     })
 }
 ```
--
+- If we spin up another goroutine within our handlers we'll have to account for panics not being recovered by our middleware chain
 
 
 ## Commands Covered
