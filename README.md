@@ -7,6 +7,9 @@ Notes by Quinn Collins
 | ------------- | ------------- | ------------- | ------------- |
 | GET | / | home | Display the home page |
 | GET | snippet/view/:id | snippetView | Display a specific snippet |
+| GET | /snippet/create | snippetCreate | Display a HTML form for creating a new snippet |
+| POST | /snippet/create | snippetCreatePost | Create a new snippet |
+| GET | /static/ | http.FileServer | Serve a specific static file |
 
 ## Project tree
 ```
@@ -201,7 +204,15 @@ recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ myMiddleware ↔ 
 ```
 - `return` before a `next.ServeHTTP(w, r)` will stop the chain from being executed.
 ### Advanced Routing
-- 
+- Introduce a third-party router [julienschmidt/httprouter](https://github.com/julienschmidt/httprouter)
+- Library chosen for being focused, lightweight, and fast. Automatically handles **OPTIONS** requests and sends appropriate responses.
+- Library does not support regexp route patterns and 'grouping' of routes which use specific middleware.
+- We can have Clean URLS and method-based routing via this library.
+- Override httprouter.NotFound with our own handler function that wraps our app.notFound(w) helper
+### Processing Forms
+- Set up our one form using **action** and **method** attributes so our form will POST data to **/snippet/create**
+- We parse the form from the handler by calling `r.ParseForm()` and retrieving data by `r.PostForm.Get("title")`
+
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
