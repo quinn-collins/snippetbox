@@ -2,6 +2,7 @@
 # Notes
 
 ## Project tree
+> Inspired by: https://peter.bourgon.org/go-best-practices-2016/#repository-structure
 ```
 .
 ├── README.md
