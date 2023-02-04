@@ -91,9 +91,22 @@
 - `flag.Parse()`
 - `err := http.ListenAndServe(*addr, mux)
 - You can use environment variables while starting the application
-#### Leveled Logging
+### Leveled Logging
 - Prefix information messages with **INFO** and error messages with **ERROR**
-#### Centralized Error Handling
+- `infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)`
+- `errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)`
+- Can redirect standard out and standard error streams to different places from the start of the application
+- `go run ./cmd/web >>/tmp/info.log 2>>/tmp/error.log`
+- Create a new http.Server struct with our new error logger
+```
+srv := &http.Server{
+  Addr: *addr,
+  ErrorLog: errorLog,
+  Handler: mux,
+}
+```
+- 
+### Centralized Error Handling
 -
 
 ## Notes
@@ -160,4 +173,5 @@
 `go run snippetbox.qcollins.net`\
 `go run ./cmd/web`\
 `go run ./cmd/web -addr=":80"`\
-`go run ./cmd/web -help`
+`go run ./cmd/web -help`\
+`go run ./cmd/web >>/tmp/info.log 2>>/tmp/error.log`
