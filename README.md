@@ -1,12 +1,11 @@
-# 'Let's Go' by Alex Edwards
-# Notes
+# 'Let's Go' book by Alex Edwards - Notes by Quinn Collins
 
 ## Project tree
 > Inspired by: https://peter.bourgon.org/go-best-practices-2016/#repository-structure
 
-> TODO: READ his recommended links for new best practices:
-> https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
-> https://github.com/thockin/go-build-template
+> TODO: READ his recommended links for new best practices:\
+> https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1\
+> https://github.com/thockin/go-build-template\
 ```
 .
 ├── README.md
@@ -73,20 +72,22 @@
 ```
 
 ## Architecture Decisions
-1. Need: A way to execute application logic and write HTTP response headers and bodies
-- Used: A handler function in go that accepts an http.ResponseWriter and a *http.Request
-2. Need: A way to store a mapping between the URL patterns and their corresponding handlers
-- Used: A new ServeMux() and registered handlers via mux.HandleFunc(path, handlerFunction)
-3. Need: A way to listen for incoming requests
-- Used: http.ListenAndServe(port, servemux)
-4. Need: A way to make `/` behave like a fixed path and return NOT FOUND if path does not match
-- Used: conditional to check if path does not equal `/` that returns http.NotFound(w, r)
-5. Need: A way to return html in a response
-- Used: `template.ParseFiles(fileRelativePaths []string)` and ts.ExecuteTemplate(w, template, nil)
-6. Need: A way to serve static files
-- Used: `net/http` `http.FileServer` in a route for `/static/`
-
-## Design Decisions
+### Routing Requests
+- Go functions that accept `http.ResponseWriter` & `*http.Request` passed to `http.HandlerFunc()`
+- Chain handlers together via `ServeHTTP()` interface
+- Handlers managed by a Go `servemux` (HTTP request multiplexer) AKA a router
+- ServeMux is created and we create a mapping between url and handler via `mux.HandleFunc(path, handlerFunction)`
+- Listen for incoming requests via `http.ListenAndServer(port, mux)`
+### Serving Content
+- Parse Go templates with `ts, err := template.ParseFiles(files)`
+- Write template content to respones body with `ts.ExecuteTemplate(w, template, nil)`
+- Static content served with `http.FileServer`
+- Pass the fileserver into mux to create a route at `/static/`
+- Use static content in templates by adding links in the `head` of the HTML document+
+### Configuration
+-
+### Error Handling
+-
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
