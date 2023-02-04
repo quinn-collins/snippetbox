@@ -1,4 +1,5 @@
-# 'Let's Go' book by Alex Edwards - Notes by Quinn Collins
+# 'Let's Go' book by Alex Edwards
+Notes by Quinn Collins
 
 ## Project tree
 ```
@@ -67,7 +68,7 @@
 ```
 > Inspired by: https://peter.bourgon.org/go-best-practices-2016/#repository-structure
 
-> TODO: READ his recommended links for new best practices
+> TODO: Read Peter Bourgon recommended links for new best practices
 > - https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
 > - https://github.com/thockin/go-build-template
 
@@ -306,5 +307,4 @@ buf.WriteTo(w)
 `go get -u github.com/foo/bar`\
 `go get -u github.com/foo/bar@v2.0.0`\
 `go get github.com/foo/bar@none`\
-`go mod tidy -v`\
-
+`go mod tidy -v`
