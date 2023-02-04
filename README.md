@@ -4,15 +4,15 @@
 ## Project tree
 > Inspired by: https://peter.bourgon.org/go-best-practices-2016/#repository-structure
 
-> TODO: READ his recommended links: 
+> TODO: READ his recommended links for new best practices:
 > https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
 > https://github.com/thockin/go-build-template
 ```
 .
 ├── README.md
 ├── \
-├── cmd
-│   └── web
+├── cmd  # Appliation-specific code for executable applications within project
+│   └── web # Executable application
 │       ├── context.go
 │       ├── handlers.go
 │       ├── handlers_test.go
@@ -26,7 +26,7 @@
 │       └── testutils_test.go
 ├── go.mod
 ├── go.sum
-├── internal
+├── internal # Ancillary non-application-specific code, potentially re-usable code across applications
 │   ├── assert
 │   │   └── assert.go
 │   ├── models
@@ -46,10 +46,10 @@
 ├── tls
 │   ├── cert.pem
 │   └── key.pem
-└── ui
+└── ui # User-interface assets used by the web application
     ├── efs.go
-    ├── html
-    │   ├── base.tmpl.html
+    ├── html # HTML templates
+    │   ├── base.tmpl.html # Master template for shared content
     │   ├── pages
     │   │   ├── create.tmpl.html
     │   │   ├── home.tmpl.html
@@ -113,9 +113,14 @@
 - Can use `r.URL.Query().Get()` to retrieve request URL query strings
 - Can use `strconv.Atoi()` to parse strings to integers
 - `fmt.Fprintf()` takes an `io.Writer` interface which `http.ResponseWriter` satisfies
+- `internal` directory
+  - Any packages under `internal` can only be imported by code inside the parent of `internal`
+- `html/template`
+  - `ParseFiles()` must either be relative to current working directory or an absolute path
 
 
 ## Commands Covered
 `go run .`
 `go run main.go`
 `go run snippetbox.qcollins.net`
+`go run ./cmd/web`
