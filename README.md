@@ -2,6 +2,7 @@
 # Notes
 
 ## Project tree
+```
 .
 ├── README.md
 ├── \
@@ -64,6 +65,7 @@
         └── js
             ├── index.html
             └── main.js
+            ```
 
 ## Project tree
  * [cmd](./cmd)
