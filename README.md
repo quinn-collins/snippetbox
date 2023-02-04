@@ -56,7 +56,7 @@
     │   │   ├── login.tmpl.html
     │   │   ├── signup.tmpl.html
     │   │   └── view.tmpl.html
-    │   └── partials
+    │   └── partials # HTML templates to be reused in different pages or layouts
     │       └── nav.tmpl.html
     └── static
         ├── css
@@ -72,9 +72,7 @@
             └── main.js
 ```
 
-## Overview of architecture and design decisions
-
-### Decisions
+## Architecture Decisions
 1. Need: A way to execute application logic and write HTTP response headers and bodies
 - Used: A handler function in go that accepts an http.ResponseWriter and a *http.Request
 2. Need: A way to store a mapping between the URL patterns and their corresponding handlers
@@ -83,8 +81,14 @@
 - Used: http.ListenAndServe(port, servemux)
 4. Need: A way to make `/` behave like a fixed path and return NOT FOUND if path does not match
 - Used: conditional to check if path does not equal `/` that returns http.NotFound(w, r)
+5. Need: A way to return html in a response
+- Used: `template.ParseFiles(fileRelativePaths []string)` and ts.ExecuteTemplate(w, template, nil)
+6. Need: A way to serve static files
+- Used: `net/http` `http.FileServer` in a route for `/static/`
 
-### Notes
+## Design Decisions
+
+## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
 - servemux
   - Go's servemux treats the URL pattern "/" like a catch-all.
@@ -117,6 +121,29 @@
   - Any packages under `internal` can only be imported by code inside the parent of `internal`
 - `html/template`
   - `ParseFiles()` must either be relative to current working directory or an absolute path
+- Go HTML Templates
+  - `{{define "base"}}...{{end}}` defines a distinct named template called base
+  - `{{template "title" .}}` actions denote that we want to invoke other named templates i.e. `title`
+  - `.` represents dynamic data to be passed to the invoked template
+  - `{{block}}...{{end}}` can be used instead of `{{template}}` if you want to include default content i.e. a sidebar
+- `net/http` `fileserver`
+  - All request paths are sanitized by running them through `path.Clean()`
+  - Supports [Range Requests](https://benramsey.com/blog/2008/05/206-partial-content-and-range-requests/)
+  - `Last-Modified` and `If-Modified-Since` headers are transparently supported
+  - `Content-Type` is automatically set from the file extension using `mime.TypeByExtension()` function
+  - You can add custom extensions and content types using `mime.AddExtensionType()`
+  - `http.FileServer` will most likely serve files from RAM after inital application run
+  - `http.ServeFile()` can be used to serve a single file form within a handler but does not automatically sanitize the file path
+  - [Disable FileServer Directory Listings](https://www.alexedwards.net/blog/disable-http-fileserver-directory-listings)
+- `http.Handler` interface
+  - Handler is any object that satisfies the `http.Handler` interface
+    - i.e - has a `ServeHTTP(ResponseWriter, *Request)` function
+  - Functions can be passed to `http.HandlerFunc()` to make them satisfy the interface
+  - `servemux` also satisfies the `http.Handler` interface so that we may chain handlers
+  - Common Go idiom is to chain `ServeHTTP()` handlers which is how we can think of this app
+- All incoming HTTP requests are served in their own goroutine
+  - Code called in or by your handlers will most likely be running concurrently
+  - Be aware of race conditions when accessing shared resources from handlers
 
 
 ## Commands Covered
