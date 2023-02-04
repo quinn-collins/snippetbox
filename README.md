@@ -1,11 +1,6 @@
 # 'Let's Go' book by Alex Edwards - Notes by Quinn Collins
 
 ## Project tree
-> Inspired by: https://peter.bourgon.org/go-best-practices-2016/#repository-structure
-
-> TODO: READ his recommended links for new best practices \
-> - https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1 \
-> - https://github.com/thockin/go-build-template \
 ```
 .
 ├── README.md
@@ -70,6 +65,11 @@
             ├── index.html
             └── main.js
 ```
+> Inspired by: https://peter.bourgon.org/go-best-practices-2016/#repository-structure
+
+> TODO: READ his recommended links for new best practices
+> - https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
+> - https://github.com/thockin/go-build-template
 
 ## Architecture Decisions
 ### Routing Requests
@@ -98,12 +98,6 @@
 - Can redirect standard out and standard error streams to different places from the start of the application
 - `go run ./cmd/web >>/tmp/info.log 2>>/tmp/error.log`
 - Create a new http.Server struct with our new error logger
-### Database-driven response
-#### Setting up database and connection
-- Installed MySql locally
-- Scaffolded the database. Created database added snippets table with some data.
-- Created a user to restrict the amount of access our application has while running.
-- Installed a [driver](https://github.com/go-sql-driver/mysql)
 ```
 srv := &http.Server{
   Addr: *addr,
@@ -135,6 +129,12 @@ func (app *application) serverError(w http.ResponseWriter, err error) {}
 func (app *application) clientError(w http.ResponseWriter, status int) {}
 func (app *application) notFound(w http.ResponseWriter) {}
 ```
+### Database-driven response
+#### Setting up database and connection
+- Installed MySql locally
+- Scaffolded the database. Created database added snippets table with some data.
+- Created a user to restrict the amount of access our application has while running.
+- Installed a [driver](https://github.com/go-sql-driver/mysql)
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
