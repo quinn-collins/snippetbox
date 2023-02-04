@@ -1,6 +1,71 @@
 # 'Let's Go' by Alex Edwards
 # Notes
 
+## Project tree
+
+.
+ * [cmd](./cmd)
+   * [web](./cmd/web)
+   * [context.go](./cmd/web/context.go)
+   * [helpers.go](./cmd/web/helpers.go)
+   * [middleware.go](./cmd/web/middleware.go)
+   * [templates.go](./cmd/web/templates.go)
+   * [templates_test.go](./cmd/web/templates_test.go)
+   * [handlers.go](./cmd/web/handlers.go)
+   * [middleware_test.go](./cmd/web/middleware_test.go)
+   * [routes.go](./cmd/web/routes.go)
+   * [main.go](./cmd/web/main.go)
+   * [testutils_test.go](./cmd/web/testutils_test.go)
+   * [handlers_test.go](./cmd/web/handlers_test.go)
+ * [tls](./tls)
+   * [cert.pem](./tls/cert.pem)
+   * [key.pem](./tls/key.pem)
+ * [go.mod](./go.mod)
+ * [go.sum](./go.sum)
+ * [ui](./ui)
+   * [static](./ui/static)
+     * [css](./ui/static/css)
+       * [main.css](./ui/static/css/main.css)
+       * [index.html](./ui/static/css/index.html)
+     * [img](./ui/static/img)
+       * [logo.png](./ui/static/img/logo.png)
+       * [favicon.ico](./ui/static/img/favicon.ico)
+       * [index.html](./ui/static/img/index.html)
+     * [index.html](./ui/static/index.html)
+     * [js](./ui/static/js)
+     * [main.js](./ui/static/js/main.js)
+     * [index.html](./ui/static/js/index.html)
+   * [html](./ui/html)
+     * [base.tmpl.html](./ui/html/base.tmpl.html)
+     * [pages](./ui/html/pages)
+       * [view.tmpl.html](./ui/html/pages/view.tmpl.html)
+       * [home.tmpl.html](./ui/html/pages/home.tmpl.html)
+       * [create.tmpl.html](./ui/html/pages/create.tmpl.html)
+       * [login.tmpl.html](./ui/html/pages/login.tmpl.html)
+       * [signup.tmpl.html](./ui/html/pages/signup.tmpl.html)
+     * [partials](./ui/html/partials)
+     * [nav.tmpl.html](./ui/html/partials/nav.tmpl.html)
+   * [efs.go](./ui/efs.go)
+ * [internal](./internal)
+   * [validator](./internal/validator)
+     * [validator.go](./internal/validator/validator.go)
+   * [assert](./internal/assert)
+     * [assert.go](./internal/assert/assert.go)
+   * [models](./internal/models)
+   * [errors.go](./internal/models/errors.go)
+   * [snippets.go](./internal/models/snippets.go)
+   * [users.go](./internal/models/users.go)
+   * [mocks](./internal/models/mocks)
+     * [users.go](./internal/models/mocks/users.go)
+     * [snippets.go](./internal/models/mocks/snippets.go)
+   * [testdata](./internal/models/testdata)
+     * [setup.sql](./internal/models/testdata/setup.sql)
+     * [teardown.sql](./internal/models/testdata/teardown.sql)
+   * [testutils_test.go](./internal/models/testutils_test.go)
+   * [users_test.go](./internal/models/users_test.go)
+ * [\](./\)
+ * [README.md](./README.md)
+
 ## Overview of architecture and design decisions
 
 ### Decisions
@@ -33,7 +98,15 @@
   - Can let the user know what request methods are allowed with `w.Header().Set("Allow", "POST")
   - Can use http.Error(w, string, statusCode) to send a non-200 and plain-text response body
     - Note we are passing http.ResponseWriter to a function that sends a response on our behalf
+  - It's rare to use w.WriteHeader() and w.Write() methods directly
 - Go will attempt to resolve named ports by checking /etc/services when starting the server
+- net/http constants can be used for common HTTP status codes
+- When sending a response to the user Go will automatically set `Date` `Content-Length` and `Content-Type`
+  - Go attempts to set `Content-Type` by sniffing response bodies with http.DetectContentType()
+  - `Content-Type: application/octet-stream` is the fallback when Go cannot detect the type
+- Can use `r.URL.Query().Get()` to retrieve request URL query strings
+- Can use `strconv.Atoi()` to parse strings to integers
+- `fmt.Fprintf()` takes an `io.Writer` interface which `http.ResponseWriter` satisfies
 
 
 ## Commands Covered
