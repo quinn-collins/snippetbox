@@ -20,6 +20,19 @@
   - Supports fixes paths `/snippet/view` and subtree paths `/` `/static/`
   - Fixed paths are only matched when path matches exactly
   - Subtree paths are matched when the start of a request path matches
+  - Longer URL patterns take precedence over shorter ones
+  - URL paths are automatically sanitized I.e. directory manipulation with `..` or `////`
+  - Automatic redirect to matching subtree path
+  - Does not support routing based on request method
+  - Does not support clean URLs with variables
+  - Does not support regexp patterns
+- http.ResponseWriter
+  - Can only call w.WriteHeader() once per response
+  - Can not call w.WriteHeader() after status code has been written
+  - w.Write() will send a `200 OK` if w.WriteHeader() is not called explicitly
+  - Can let the user know what request methods are allowed with `w.Header().Set("Allow", "POST")
+  - Can use http.Error(w, string, statusCode) to send a non-200 and plain-text response body
+    - Note we are passing http.ResponseWriter to a function that sends a response on our behalf
 - Go will attempt to resolve named ports by checking /etc/services when starting the server
 
 
