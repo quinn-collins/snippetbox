@@ -86,11 +86,14 @@
 - Use static content in templates by adding links in the `head` of the HTML document+
 ### Managing Configuration Settings
 #### Environment Variables and Command-line Flags
-- Example command: `go run ./cmd/web -addr=":80"`
-- `addr := flag.String("addr", ":4000", "HTTP network address")`
-- `flag.Parse()`
-- `err := http.ListenAndServe(*addr, mux)
+- `go run ./cmd/web -addr=":80"`
+```
+addr := flag.String("addr", ":4000", "HTTP network address")
+flag.Parse()
+err := http.ListenAndServe(*addr, mux)
+```
 - You can use environment variables while starting the application
+- `go run ./cmd/web -addr=$SNIPPET_BOX_HTTP_PORT`
 ### Leveled Logging
 - Prefix information messages with **INFO** and error messages with **ERROR**
 - `infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)`
@@ -129,7 +132,7 @@ func (app *application) serverError(w http.ResponseWriter, err error) {}
 func (app *application) clientError(w http.ResponseWriter, status int) {}
 func (app *application) notFound(w http.ResponseWriter) {}
 ```
-### Database-driven response
+### Database-driven Response
 #### Setting up the database and connection
 - Installed MySql locally
 - Scaffolded the database. Created database added snippets table with some data.
@@ -148,8 +151,39 @@ func (app *application) notFound(w http.ResponseWriter) {}
 - Pass models to handlers via dependency injection
 - This makes for a clean separation of concerns where our database logic isn't tied to our handlers
 - Models actions are mockable and testable
-### Dynamic HTML templates
--
+### Dynamic HTML Templates
+- Render a Go template from the handler passing in data from the model
+- Access data in the template via `.` syntax.
+- Wrap data in a struct within handler so that we can pass multiple pieces of dynamic data.
+- Caching templates so that we aren't parsing the files from the hard drive repeatedly
+```
+cache := map[string]*template.Template{}
+pages, err := filepath.Glob("./ui/html/pages/*.tmpl")
+
+for _, page := range pages {
+    name := filepath.Base(page)
+    files := []string{
+        "./ui/html/base.tmpl",
+        "./ui/html/partials/nav.tmpl",
+        page,
+}
+
+ts, err := template.ParseFiles(files...)
+cache[name] = ts
+}
+
+```
+- Add template cache to application struct for dependency injection
+- Initialize a new template cache
+- Add cache to application dependencies
+- Make template render a two-stage process to avoid runtime errors within our template that return a **200 OK** to our user
+```
+buf := new(bytes.Buffer)
+err := ts.ExecuteTemplate(buf, "base", data)
+w.WriteHeader(status)
+buf.WriteTo(w)
+```
+### Middleware
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
@@ -235,7 +269,23 @@ func (app *application) notFound(w http.ResponseWriter) {}
 - Can use `DB.Prepare()` to create a prepared statement for reuse to eliminate the cost of re-preparing statements on database connections.
   - Prepared statements exist on database connections.
   - Tradeoff of complexity vs. performance
-- 
+- **html/template** package automatically escapes any data between `{{ }}` which is helpful in preventing XSS attacks.
+- When you invoke a template from within a template, data needs to be pipelined
+```
+{{template "main" .}}
+{{block "sidebar" .}}{{end}}
+```
+- Methods can be called from a type passed into the template
+- You can pass parameters to these methods like this:
+```
+<span>{{.Snippet.Created.AddDate 0 6 0}}</span>
+```
+- **html/template** always strips out any HTML comments including conditional comments
+- Can add common dynamic data to a struct and then initialize it within a method to be used across templates within the handlers
+- Custom template functions can be created with the `template.FuncMap` object and registered with the `template.Funcs() method
+  - These steps must happen before you parse the templates
+  - Custom template functions can return only one value and optionally error as a second value
+- `{{.Created | humanDate}}` and `{{humanDate .Created}}` are equivalent
 
 
 ## Commands Covered
