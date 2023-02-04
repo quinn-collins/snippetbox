@@ -5,7 +5,7 @@
 .
 ├── README.md
 ├── \
-├── cmd  # Appliation-specific code for executable applications within project
+├── cmd  # Application-specific code for executable applications within project
 │   └── web # Executable application
 │       ├── context.go
 │       ├── handlers.go
@@ -130,11 +130,26 @@ func (app *application) clientError(w http.ResponseWriter, status int) {}
 func (app *application) notFound(w http.ResponseWriter) {}
 ```
 ### Database-driven response
-#### Setting up database and connection
+#### Setting up the database and connection
 - Installed MySql locally
 - Scaffolded the database. Created database added snippets table with some data.
 - Created a user to restrict the amount of access our application has while running.
 - Installed a [driver](https://github.com/go-sql-driver/mysql)
+#### Creating the database connection pool
+- Go's `sql.Open()` function used to return a **sql.DB** object
+`db, err := sql.Open("mysql", "web:pass@/snippetbox?parseTime=true")`
+- A **sql.DB* object is a pool of many connections
+- Go manages connections in the connection pool via the driver.
+- We use defer on a `db.Close()` call to close the connection pool before `main()` function exits
+#### Designing the database model (I.e. service layer or data access layer)
+- Add in a struct for data and a struct for the model under **internal/models/**
+- Add methods on the model for CRUD operations etc.
+- Add **prepared** SQL statements to methods
+- Pass models to handlers via dependency injection
+- This makes for a clean separation of concerns where our database logic isn't tied to our handlers
+- Models actions are mockable and testable
+### Dynamic HTML templates
+-
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
@@ -198,10 +213,35 @@ func (app *application) notFound(w http.ResponseWriter) {}
 - Can use `debug.Stack()` to get a stack trace for current goroutine
 - Can use `http.StatusTexT()` to generate a human-friendly text representation of a given HTTP status code
 - Error logger's `Output()` function may need frame depth set to return correct stack trace of where the error originated
+- go.mod file contains exactr versions of packages used to help with reproducible builds
+- go.sum file contains cryptographic checksums representing content of required packages
+- dsn for database connection can include `parseTime=true` to convert SQL **TIME** and **DATE** to Go **time.Time**
+- A **sql.DB** connection pool is safe for concurrent access and can be used form handlers safely
+- Connection pool to database is intended to be long-lived. Don't call `sql.Open()` in a short-lived handler.
+- Import paths can be prefixed with a `_` to denote that we won't be using anything in the package.
+- Database connections are established lazily, as and when needed for the first time.
+- Can use db.Ping() method to create a connection and check for errors.
+- `errors.Is()` is best practice way to check for error equality
+  - Go 1.13 added ability to wrap errors which made regular equality operators unuseable
+- Errors from `DB.QueryRow()` are deferred until `Scan()` is called
+- It's critical to close a **resultset* with `defer rows.Close()` to let the database connection close
+- [jmoiron/sqlx](https://github.com/jmoiron/sqlx) Can be used to reduce verbosity of using the standard **database/sql** package
+- Go does not handle NULL values in database records well
+  - If we query a row that contains a **NULL** value and `rows.Scan()`, go won't be able to convert **NULL** into a string.
+  - This can be fixed with `sql.NullString` or simply avoiding **NULL** values altogether.
+- `Exec()`, `Query()`, `QueryRow()` can use any connection from `sql.DB` pool. They may not run on the same connection.
+  - You can wrap multiple statements in a transaction to guarantee the same connection is used.
+  - You must always call `Rollback()` or `Commit()` before a function returns otherwise the connection will stay open.
+- Can use `DB.Prepare()` to create a prepared statement for reuse to eliminate the cost of re-preparing statements on database connections.
+  - Prepared statements exist on database connections.
+  - Tradeoff of complexity vs. performance
+- 
 
 
 ## Commands Covered
 `go run .`\
+`go test .`\
+`go build .`\
 `go run main.go`\
 `go run snippetbox.qcollins.net`\
 `go run ./cmd/web`\
@@ -211,3 +251,10 @@ func (app *application) notFound(w http.ResponseWriter) {}
 `go get github.com/go-sql-driver/mysql@v1`\
 `go get github.com/go-sql-driver/mysql`\
 `go get github.com/go-sql-driver/mysql@v1.0.3`\
+`go mod verify`\
+`go mod download`\
+`go get -u github.com/foo/bar`\
+`go get -u github.com/foo/bar@v2.0.0`\
+`go get github.com/foo/bar@none`\
+`go mod tidy -v`\
+
