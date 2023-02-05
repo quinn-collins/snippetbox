@@ -216,7 +216,7 @@ recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ myMiddleware ↔ 
 - Set up a validator package that contains helper functions for validating forms and a struct for holding errors.
 - Utilize the validators when receiving POST requests to validate the data coming in.
 - Manage the validation errors gracefully by re-displaying the HTML form, highlighting the fields which failed and re-populating previously submitted data.
-- In our handler we check for validation error, if it exists we populate a map FieldErrors[string]string. If map is not empty we re-display the template we the data we received on the last POST request.
+- In our handler we check for validation error, if it exists we populate a map FieldErrors[string]string. If map is not empty we re-display the template with the data we received on the last POST request utilizing Go template `{{with .Data}}` syntax.
 
 
 ## Notes
@@ -341,6 +341,7 @@ func myMiddleware(next http.Handler) http.Handler {
 ```
 - If we spin up another goroutine within our handlers we'll have to account for panics not being recovered by our middleware chain
 - Struct fields must be exported in order to be read by html/template package when rendering a template
+- In a template you can access a Go map[string]string] just by chaining the key name on. `{{.Form.FieldErrors.title}}`
 
 
 ## Commands Covered
