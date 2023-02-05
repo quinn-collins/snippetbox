@@ -3,18 +3,18 @@ Notes by Quinn Collins
 
 ## Routes
 
-| Method  | Pattern | Handler | Action |
-| ------------- | ------------- | ------------- | ------------- |
-| GET | / | home | Display the home page |
-| GET | snippet/view/:id | snippetView | Display a specific snippet |
-| GET | /snippet/create | snippetCreate | Display a HTML form for creating a new snippet |
-| POST | /snippet/create | snippetCreatePost | Create a new snippet |
-| GET | /user/signup | userSignup | Displaay a HTML form for signing up a new user |
-| POST | /user/signup | userSignupPost | Create a new user |
-| GET | /user/login | userLogin | Display a HTML form for logging in a user |
-| POST | /user/login | userLoginPost | Authenticate and login a user |
-| POST | /user/logout | userLogoutPost | Logout the user |
-| GET | /static/\*filepath | http.FileServer | Serve a specific static file |
+| Method  | Pattern | Handler | Action | Middleware Chain |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| GET | / | home | Display the home page | Dynamic |
+| GET | snippet/view/:id | snippetView | Display a specific snippet | Dynamic |
+| GET | /snippet/create | snippetCreate | Display a HTML form for creating a new snippet | Protected |
+| POST | /snippet/create | snippetCreatePost | Create a new snippet | Protected |
+| GET | /user/signup | userSignup | Display a HTML form for signing up a new user | Dynamic |
+| POST | /user/signup | userSignupPost | Create a new user | Dynamic |
+| GET | /user/login | userLogin | Display a HTML form for logging in a user | Dynamic |
+| POST | /user/login | userLoginPost | Authenticate and login a user | Dynamic |
+| POST | /user/logout | userLogoutPost | Logout the user | Protected |
+| GET | /static/\*filepath | http.FileServer | Serve a specific static file | Dynamic |
 
 ## Project tree
 ```
@@ -239,9 +239,28 @@ standard: recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ applica
 - Addded timeouts for **IDLE:** 1 minute, **READ:** 5 seconds, and **WRITE** 10 seconds 
 - Added a READ timeout of 5 seconds to help mitigate the risk from slow-client attacks. Set an IDLE timeout of 1 minute so it does not default to 5 seconds.
 - Added a WRITE timeout of 10 seconds to prevent data the handler returns from taking too long to write.
+- For CSRF attacks we set SameSite attribute to lax on the session cookie so that the session cookie won't be sent by the user's browser for unsafe cross-site requests.
+- For CSRF attacks we add a library [justinas/nosurf](https://github.com/justinas/nosurf) to manage a customized CSRF cookie that is added on all routes.
+- We get the CSRF token from the request context, add it to template data so that it is available on every template. We add that CSRF token in a field like so:
+```
+<input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
+```
 ### User Authentication
--
-
+- Add a users model for accessing users database table.
+- Use bcrypt to store a one-way hash of the password with a cost of 12.
+- Include check for unique email in the POST so that we don't create a race condition by adding a method on UserModel.
+- Once again add validation to the form for creating a user and signing in as a user.
+- Authentication core takes place in a method on UserModel called Authenticate that gets details from the database and compares them with what was supplied with the request.
+- Generate a new session token after authentication succeeds or logout happens.
+- Add/Remove authenticatedUserID on Login/Logout
+### User Authorization
+- Authenticated users are authorized to see 'Home', 'Create snippet', and 'Logout'
+- Unauthenticated users are authorized to see 'Home', 'Signup', and 'Login'
+- We add a helper function to check to see if a user is authenticated by checking request context for `authenticatedUserId`
+- We add a IsAuthenticated boolean to template data to determine what is shown on the page.
+- Add new middleware chain requireAuthentication for routes that need it. Such as POSTing data to the server.
+### Request Context
+- 
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
