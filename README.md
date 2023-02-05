@@ -260,7 +260,20 @@ standard: recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ applica
 - We add a IsAuthenticated boolean to template data to determine what is shown on the page.
 - Add new middleware chain requireAuthentication for routes that need it. Such as POSTing data to the server.
 ### Request Context
-- 
+- Create a constant with type contextKey: string for storing our isAuthenticatedContextKey
+- Add our key to the current constant in a middleware chain called authenticated. 
+- Add a exists method on the usermodel to see if a user with a specific ID exists
+- We retrieve the users id from their session data, check the database with our exists method, and update request context to include our context key
+### Embedding
+-
+### Unit Testing
+-
+### End-to-end Testing
+-
+### Integration Testing
+-
+### Test Coverage Profiling
+-
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
