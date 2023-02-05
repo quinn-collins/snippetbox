@@ -9,7 +9,12 @@ Notes by Quinn Collins
 | GET | snippet/view/:id | snippetView | Display a specific snippet |
 | GET | /snippet/create | snippetCreate | Display a HTML form for creating a new snippet |
 | POST | /snippet/create | snippetCreatePost | Create a new snippet |
-| GET | /static/ | http.FileServer | Serve a specific static file |
+| GET | /user/signup | userSignup | Displaay a HTML form for signing up a new user |
+| POST | /user/signup | userSignupPost | Create a new user |
+| GET | /user/login | userLogin | Display a HTML form for logging in a user |
+| POST | /user/login | userLoginPost | Authenticate and login a user |
+| POST | /user/logout | userLogoutPost | Logout the user |
+| GET | /static/\*filepath | http.FileServer | Serve a specific static file |
 
 ## Project tree
 ```
@@ -226,6 +231,16 @@ standard: recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ applica
 - We add session management to a new middleware chain that is only called where POST requests are received.
 - On successful POST we add a flash message to the current request context.
 - We include the flash message in the templateData struct wrapper we made to automate the display of flash messages.
+### Security
+- We used [crypto/tls/generate_cert.go](https://go.dev/src/crypto/tls/generate_cert.go) to generate a self-signed certificate for TLS for development purposes.
+- Set the `sessionManager.Cookie.Secure` value equal to `true` so that cookies are only sent when HTTPS is being used.
+- Set up Go's http library to start up a HTTPS server for us.
+- Changed the TLS config to use only eliptic curves that have assembly implementations to increase speed.
+- Addded timeouts for **IDLE:** 1 minute, **READ:** 5 seconds, and **WRITE** 10 seconds 
+- Added a READ timeout of 5 seconds to help mitigate the risk from slow-client attacks. Set an IDLE timeout of 1 minute so it does not default to 5 seconds.
+- Added a WRITE timeout of 10 seconds to prevent data the handler returns from taking too long to write.
+### User Authentication
+-
 
 
 ## Notes
