@@ -200,7 +200,9 @@ buf.WriteTo(w)
 - Log Requests
 - We used lightweight [justinas/alice](https://github.com/justinas/alice) to compose our middleware chain
 ```
-recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ myMiddleware ↔ application handler
+dynamic: sessionManager.LoadAndSave ↔ noSurf ↔ app.authenticate
+protected: sessionManager.LoadAndSave ↔ noSurf ↔ app.authenticate ↔ app.requireAuthentication
+standard: recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ application handler
 ```
 - `return` before a `next.ServeHTTP(w, r)` will stop the chain from being executed.
 ### Advanced Routing
@@ -217,6 +219,13 @@ recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ myMiddleware ↔ 
 - Utilize the validators when receiving POST requests to validate the data coming in.
 - Manage the validation errors gracefully by re-displaying the HTML form, highlighting the fields which failed and re-populating previously submitted data.
 - In our handler we check for validation error, if it exists we populate a map FieldErrors[string]string. If map is not empty we re-display the template with the data we received on the last POST request utilizing Go template `{{with .Data}}` syntax.
+### Stateful HTTP & Session Management
+- We use [alexedwards/scs](https://github.com/alexedwards/scs) to make session management easier.
+- We store the session data server-side in MySQL.
+- Session data is a combination of a unique token, binary data in a BLOB type, and an expiry field.
+- We add session management to a new middleware chain that is only called where POST requests are received.
+- On successful POST we add a flash message to the current request context.
+- We include the flash message in the templateData struct wrapper we made to automate the display of flash messages.
 
 
 ## Notes
