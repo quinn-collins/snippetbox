@@ -152,7 +152,7 @@ func (app *application) notFound(w http.ResponseWriter) {}
 #### Creating the database connection pool
 - Go's `sql.Open()` function used to return a **sql.DB** object
 `db, err := sql.Open("mysql", "web:pass@/snippetbox?parseTime=true")`
-- A **sql.DB* object is a pool of many connections
+- A **sql.DB** object is a pool of many connections
 - Go manages connections in the connection pool via the driver.
 - We use defer on a `db.Close()` call to close the connection pool before `main()` function exits
 #### Designing the database model (I.e. service layer or data access layer)
@@ -210,15 +210,20 @@ recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ myMiddleware ↔ 
 - We can have Clean URLS and method-based routing via this library.
 - Override httprouter.NotFound with our own handler function that wraps our app.notFound(w) helper
 ### Processing Forms
-- Set up our one form using **action** and **method** attributes so our form will POST data to **/snippet/create**
+- Set up our form using **action** and **method** attributes so our form will POST data to **/snippet/create**
 - We parse the form from the handler by calling `r.ParseForm()` and retrieving data by `r.PostForm.Get("title")`
+### Form Validation
+- Set up a validator package that contains helper functions for validating forms and a struct for holding errors.
+- Utilize the validators when receiving POST requests to validate the data coming in.
+- Manage the validation errors gracefully by re-displaying the HTML form, highlighting the fields which failed and re-populating previously submitted data.
+- In our handler we check for validation error, if it exists we populate a map FieldErrors[string]string. If map is not empty we re-display the template we the data we received on the last POST request.
 
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
 - servemux
   - Go's servemux treats the URL pattern "/" like a catch-all.
-  - Supports fixes paths `/snippet/view` and subtree paths `/` `/static/`
+  - Supports fixed paths `/snippet/view` and subtree paths `/`, `/static/`
   - Fixed paths are only matched when path matches exactly
   - Subtree paths are matched when the start of a request path matches
   - Longer URL patterns take precedence over shorter ones
@@ -335,6 +340,7 @@ func myMiddleware(next http.Handler) http.Handler {
 }
 ```
 - If we spin up another goroutine within our handlers we'll have to account for panics not being recovered by our middleware chain
+- Struct fields must be exported in order to be read by html/template package when rendering a template
 
 
 ## Commands Covered
