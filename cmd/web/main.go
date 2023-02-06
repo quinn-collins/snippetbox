@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -29,7 +30,9 @@ type application struct {
 
 func main() {
   addr := flag.String("addr", ":4000", "HTTP network address")
-  dsn := flag.String("dsn", "web:Minitri5fire!@/snippetbox?parseTime=true", "MySQL data source name")
+  dsn := flag.String("dsn", "web:pass@/snippetbox?parseTime=true", "MySQL data source name")
+  debug := flag.Bool("debug", false, "Enable debug mode")
+  fmt.Println(debug)
 
   flag.Parse()
 
