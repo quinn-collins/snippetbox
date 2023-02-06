@@ -19,6 +19,7 @@ import (
 )
 
 type application struct {
+  debug bool
   errorLog *log.Logger
   infoLog *log.Logger
   snippets models.SnippetModelInterface
@@ -58,6 +59,7 @@ func main() {
   sessionManager.Cookie.Secure = true
 
   app := &application{
+    debug: *debug,
     errorLog: errorLog,
     infoLog: infoLog,
     snippets: &models.SnippetModel{DB: db},
