@@ -3,6 +3,39 @@ https://lets-go.alexedwards.net/ \
 Notes by Quinn Collins
 
 
+## Table of Contents
+  * [Routes](#routes)
+  * [Project tree](#project-tree)
+  * [Architecture Decisions](#architecture-decisions)
+    + [Routing Requests](#routing-requests)
+    + [Serving Content](#serving-content)
+    + [Managing Configuration Settings](#managing-configuration-settings)
+      - [Environment Variables and Command-line Flags](#environment-variables-and-command-line-flags)
+    + [Leveled Logging](#leveled-logging)
+    + [Dependency Injection](#dependency-injection)
+    + [Centralized Error Handling](#centralized-error-handling)
+    + [Database-driven Response](#database-driven-response)
+      - [Setting up the database and connection](#setting-up-the-database-and-connection)
+      - [Creating the database connection pool](#creating-the-database-connection-pool)
+      - [Designing the database model (I.e. service layer or data access layer)](#designing-the-database-model--ie-service-layer-or-data-access-layer-)
+    + [Dynamic HTML Templates](#dynamic-html-templates)
+    + [Middleware](#middleware)
+    + [Advanced Routing](#advanced-routing)
+    + [Processing Forms](#processing-forms)
+    + [Form Validation](#form-validation)
+    + [Stateful HTTP & Session Management](#stateful-http---session-management)
+    + [Security](#security)
+    + [User Authentication](#user-authentication)
+    + [User Authorization](#user-authorization)
+    + [Request Context](#request-context)
+    + [Embedding](#embedding)
+    + [Unit Testing](#unit-testing)
+    + [End-to-end Testing](#end-to-end-testing)
+    + [Integration Testing](#integration-testing)
+  * [Notes](#notes)
+  * [Commands Covered](#commands-covered)
+
+
 ## Routes
 | Method  | Pattern | Handler | Action | Middleware Chain |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
