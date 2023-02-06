@@ -2,11 +2,12 @@
 https://lets-go.alexedwards.net/ \
 Notes by Quinn Collins
 
-## Routes
 
+## Routes
 | Method  | Pattern | Handler | Action | Middleware Chain |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
 | GET | / | home | Display the home page | Dynamic |
+| GET | /ping | ping | Return a 200 OK | N/a |
 | GET | snippet/view/:id | snippetView | Display a specific snippet | Dynamic |
 | GET | /snippet/create | snippetCreate | Display a HTML form for creating a new snippet | Protected |
 | POST | /snippet/create | snippetCreatePost | Create a new snippet | Protected |
@@ -16,6 +17,7 @@ Notes by Quinn Collins
 | POST | /user/login | userLoginPost | Authenticate and login a user | Dynamic |
 | POST | /user/logout | userLogoutPost | Logout the user | Protected |
 | GET | /static/\*filepath | http.FileServer | Serve a specific static file | Dynamic |
+
 
 ## Project tree
 ```
@@ -88,19 +90,23 @@ Notes by Quinn Collins
 > - https://medium.com/@benbjohnson/standard-package-layout-7cdbc8391fc1
 > - https://github.com/thockin/go-build-template
 
+
 ## Architecture Decisions
+
 ### Routing Requests
 - Go functions that accept `http.ResponseWriter` & `*http.Request` passed to `http.HandlerFunc()`
 - Chain handlers together via `ServeHTTP()` interface
 - Handlers managed by a Go `servemux` (HTTP request multiplexer) AKA a router
 - ServeMux is created and we create a mapping between url and handler via `mux.HandleFunc(path, handlerFunction)`
 - Listen for incoming requests via `http.ListenAndServer(port, mux)`
+
 ### Serving Content
 - Parse Go templates with `ts, err := template.ParseFiles(files)`
 - Write template content to respones body with `ts.ExecuteTemplate(w, template, nil)`
 - Static content served with `http.FileServer`
 - Pass the fileserver into mux to create a route at `/static/`
 - Use static content in templates by adding links in the `head` of the HTML document+
+
 ### Managing Configuration Settings
 #### Environment Variables and Command-line Flags
 - `go run ./cmd/web -addr=":80"`
@@ -111,6 +117,7 @@ err := http.ListenAndServe(*addr, mux)
 ```
 - You can use environment variables while starting the application
 - `go run ./cmd/web -addr=$SNIPPET_BOX_HTTP_PORT`
+
 ### Leveled Logging
 - Prefix information messages with **INFO** and error messages with **ERROR**
 - `infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)`
@@ -125,6 +132,7 @@ srv := &http.Server{
   Handler: mux,
 }
 ```
+
 ### Dependency Injection
 - Put dependencies in a custom application struct
 - Define handler functions as methods against application struct
@@ -142,6 +150,7 @@ type application struct {
   sessionManager *scs.SessionManager
 }
 ```
+
 ### Centralized Error Handling
 - Move error handling into helper methods on the application struct
 ```
@@ -149,6 +158,7 @@ func (app *application) serverError(w http.ResponseWriter, err error) {}
 func (app *application) clientError(w http.ResponseWriter, status int) {}
 func (app *application) notFound(w http.ResponseWriter) {}
 ```
+
 ### Database-driven Response
 #### Setting up the database and connection
 - Installed MySql locally
@@ -168,6 +178,7 @@ func (app *application) notFound(w http.ResponseWriter) {}
 - Pass models to handlers via dependency injection
 - This makes for a clean separation of concerns where our database logic isn't tied to our handlers
 - Models actions are mockable and testable
+
 ### Dynamic HTML Templates
 - Render a Go template from the handler passing in data from the model
 - Access data in the template via `.` syntax.
@@ -199,6 +210,7 @@ err := ts.ExecuteTemplate(buf, "base", data)
 w.WriteHeader(status)
 buf.WriteTo(w)
 ```
+
 ### Middleware
 - Create middleware functions that accept **http.Handler** and return **http.Handler** by calling **next** handler forming a closure
 - Middleware chain, any code before `next.ServeHTTP(w, r)` is called on the way down the chain, and after is called on the way up
@@ -211,20 +223,25 @@ protected: sessionManager.LoadAndSave ↔ noSurf ↔ app.authenticate ↔ app.re
 standard: recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ application handler
 ```
 - `return` before a `next.ServeHTTP(w, r)` will stop the chain from being executed.
+
 ### Advanced Routing
 - Introduce a third-party router [julienschmidt/httprouter](https://github.com/julienschmidt/httprouter)
 - Library chosen for being focused, lightweight, and fast. Automatically handles **OPTIONS** requests and sends appropriate responses.
 - Library does not support regexp route patterns and 'grouping' of routes which use specific middleware.
 - We can have Clean URLS and method-based routing via this library.
 - Override httprouter.NotFound with our own handler function that wraps our app.notFound(w) helper
+
 ### Processing Forms
 - Set up our form using **action** and **method** attributes so our form will POST data to **/snippet/create**
 - We parse the form from the handler by calling `r.ParseForm()` and retrieving data by `r.PostForm.Get("title")`
+
 ### Form Validation
 - Set up a validator package that contains helper functions for validating forms and a struct for holding errors.
 - Utilize the validators when receiving POST requests to validate the data coming in.
 - Manage the validation errors gracefully by re-displaying the HTML form, highlighting the fields which failed and re-populating previously submitted data.
-- In our handler we check for validation error, if it exists we populate a map FieldErrors[string]string. If map is not empty we re-display the template with the data we received on the last POST request utilizing Go template `{{with .Data}}` syntax.
+- In our handler we check for validation error, if it exists we populate a map FieldErrors[string]string. If map is not empty we re-display the template with 
+the data we received on the last POST request utilizing Go template `{{with .Data}}` syntax.
+
 ### Stateful HTTP & Session Management
 - We use [alexedwards/scs](https://github.com/alexedwards/scs) to make session management easier.
 - We store the session data server-side in MySQL.
@@ -232,6 +249,7 @@ standard: recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ applica
 - We add session management to a new middleware chain that is only called where POST requests are received.
 - On successful POST we add a flash message to the current request context.
 - We include the flash message in the templateData struct wrapper we made to automate the display of flash messages.
+
 ### Security
 - We used [crypto/tls/generate_cert.go](https://go.dev/src/crypto/tls/generate_cert.go) to generate a self-signed certificate for TLS for development purposes.
 - Set the `sessionManager.Cookie.Secure` value equal to `true` so that cookies are only sent when HTTPS is being used.
@@ -246,6 +264,7 @@ standard: recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ applica
 ```
 <input type='hidden' name='csrf_token' value='{{.CSRFToken}}'>
 ```
+
 ### User Authentication
 - Add a users model for accessing users database table.
 - Use bcrypt to store a one-way hash of the password with a cost of 12.
@@ -254,27 +273,46 @@ standard: recoverPanic ↔ logRequest ↔ secureHeaders ↔ servemux ↔ applica
 - Authentication core takes place in a method on UserModel called Authenticate that gets details from the database and compares them with what was supplied with the request.
 - Generate a new session token after authentication succeeds or logout happens.
 - Add/Remove authenticatedUserID on Login/Logout
+
 ### User Authorization
 - Authenticated users are authorized to see 'Home', 'Create snippet', and 'Logout'
 - Unauthenticated users are authorized to see 'Home', 'Signup', and 'Login'
 - We add a helper function to check to see if a user is authenticated by checking request context for `authenticatedUserId`
 - We add a IsAuthenticated boolean to template data to determine what is shown on the page.
 - Add new middleware chain requireAuthentication for routes that need it. Such as POSTing data to the server.
+
 ### Request Context
 - Create a constant with type contextKey: string for storing our isAuthenticatedContextKey
 - Add our key to the current constant in a middleware chain called authenticated. 
 - Add a exists method on the usermodel to see if a user with a specific ID exists
 - We retrieve the users id from their session data, check the database with our exists method, and update request context to include our context key
+
 ### Embedding
--
+-Added file embedding to embed static files and html templates from the `ui/static` and `ui/html` directories.
+
 ### Unit Testing
--
+- Added table driven unit tests along with helper functions for assertions.
+- Added tests for handlers that checks response status by utilizing the **httptest.ResponseRecorder** type
+- Used `t.Fatal()` to trigger test failure when we get unexpected errors. 
+- Added test for middleware by mocking an http handler function and then passing it to the middleware function we are testing.
+
 ### End-to-end Testing
--
+- Utilized `httptest.NewTLSServer(app.routes())` function to spin up an **httptest.Server** that we make HTTPS requests to.
+- Set the logging fields in our application struct to **io.Discard** so that our middleware functions can run.
+- Added test helpers under `internal/testutils` for creating our application dependency, creating a test server, and a get method on our testServer struct that allows us to make a get request to specified URL.
+- Initialized a cookie jar in our test server client for storing response cookies to be sent with subsequent requests from the client.
+- Disabled redirect following by setting a custom `ts.Client().CheckRedirect` function to force client to immediately return received responses.
+- Mocked dependencies for database models so that we can test our handlers without needing to setup an entire test instance of the MySQL database
+- Changed our database models to use an interface so that we can get pointers to both models.Model and mocks.Model respectively within our application.
+- Add a testutil helper function for extracting CSRF token from the HTML so that we can test our templates.
+
 ### Integration Testing
--
-### Test Coverage Profiling
--
+- Create a test database within MySQL and inject test user and data.
+- Add a setup and teardown script for creating/dropping database tables for our tests.
+- Add a `newTestDB()` helper function in testutils to create a `*sql.DB` connection pool to the test database.
+- Create a cleanup helper function in testutils to execute teardown.sql
+- Add `t.Skip()` under `if testing.Short()` to integration tests so that we can skip these tests if we only want to run shorter running tests
+
 
 ## Notes
 - `go run` is a shortcut command that compiles code and creates an executable in `/tmp`
@@ -399,6 +437,10 @@ func myMiddleware(next http.Handler) http.Handler {
 - If we spin up another goroutine within our handlers we'll have to account for panics not being recovered by our middleware chain
 - Struct fields must be exported in order to be read by html/template package when rendering a template
 - In a template you can access a Go map[string]string] just by chaining the key name on. `{{.Form.FieldErrors.title}}`
+- Cached versions of tests will run when you don't make any changes to the package being tested.
+- Mark tests OK to be ran in parellel by including `t.Parallel()` in the function at the start of the test
+- **GOMAXPROCS** sets the default maximum number of tests that will be run simultaneously.
+- Go compiler ignores directories called **testdata** and directories that begin with a `/` or `.`
 
 
 ## Commands Covered
@@ -419,4 +461,18 @@ func myMiddleware(next http.Handler) http.Handler {
 `go get -u github.com/foo/bar`\
 `go get -u github.com/foo/bar@v2.0.0`\
 `go get github.com/foo/bar@none`\
-`go mod tidy -v`
+`go mod tidy -v`\
+`go test ./...`\
+`go test -v -run="^TestPing$" ./cmd/web/`\
+`go test -v -run="^TestHumanDate$/^UTC$" ./cmd/web`\
+`go test -count=1 ./cmd/web`\
+`go clean -testcache`\
+`go test -failfast ./cmd/web`\
+`go test -parallel 4 ./...`\
+`go test -race ./cmd/web/`\
+`go test -cover ./...`\
+`go test -coverprofile=/tmp/profile.out ./...`\
+`go tool cover -func=/tmp/profile.out`\
+`go tool cover -html=/tmp/profile.out`\
+`go test -covermode=count -coverprofile=/tmp/profile.out ./...`\
+`go tool cover -html=/tmp/profile.out`
