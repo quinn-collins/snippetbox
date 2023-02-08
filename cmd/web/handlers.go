@@ -150,7 +150,7 @@ func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
     app.render(w, http.StatusUnprocessableEntity, "signup.tmpl.html", data)
     return
   }
-  
+
   err = app.users.Insert(form.Name, form.Email, form.Password)
   if err != nil {
     if errors.Is(err, models.ErrDuplicateEmail) {
@@ -223,6 +223,11 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 
   app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
 
+  path := app.sessionManager.PopString(r.Context(), "redirectPathAfterLogin")
+  if path != "" {
+    http.Redirect(w, r, path, http.StatusSeeOther)
+    return
+  } 
   http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
 }
 
