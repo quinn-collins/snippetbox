@@ -1,8 +1,26 @@
 package mocks
 
-import "snippetbox.qcollins.net/internal/models"
+import (
+	"time"
+
+	"snippetbox.qcollins.net/internal/models"
+)
 
 type UserModel struct{}
+
+func (m *UserModel) Get(id int) (*models.User, error) {
+  if id == 1 {
+    u := &models.User{
+      ID: 1,
+      Name: "Alice",
+      Email: "alice@example.com",
+      Created: time.Now(),
+    }
+
+    return u, nil
+  }
+  return nil, models.ErrNoRecord
+}
 
 func (m *UserModel) Insert(name, email, password string) error {
   switch email {
