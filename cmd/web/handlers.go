@@ -45,6 +45,54 @@ func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
   app.render(w, http.StatusOK, "account.tmpl.html", data)
 }
 
+type accountPasswordUpdateForm struct {
+  CurrentPassword string `form:"currentPassword"`
+  NewPassword string `form:"newPassword"`
+  NewPasswordConfirmation string `form:"newPasswordConfirmation"`
+  validator.Validator `form:"-"`
+}
+
+func (app *application) accountPasswordUpdate(w http.ResponseWriter, r *http.Request) {
+  data := app.newTemplateData(r)
+  data.Form = accountPasswordUpdateForm{}
+  app.render(w, http.StatusOK, "password.tmpl.html", data)
+}
+
+func (app *application) accountPasswordUpdatePost(w http.ResponseWriter, r *http.Request) {
+  var form accountPasswordUpdateForm 
+
+  err := app.decodePostForm(r, &form)
+  if err != nil {
+    app.clientError(w, http.StatusBadRequest)
+    return
+  }
+
+  
+  form.CheckField(validator.NotBlank(form.CurrentPassword), "currentPassword", "This field cannot be blank")
+  form.CheckField(validator.NotBlank(form.NewPassword), "newPassword", "This field cannot be blank")
+  form.CheckField(validator.MinChars(form.NewPassword, 8), "newPassword", "This field cannot be less than 8 characters long")
+  form.CheckField(validator.NotBlank(form.NewPasswordConfirmation), "newPasswordConfirmation", "This field cannot be blank")
+  form.CheckField(form.NewPassword == form.NewPasswordConfirmation, "newPasswordConfirmation", "Passwords do not match")
+
+  if !form.Valid() {
+    data := app.newTemplateData(r)
+    data.Form = form
+    app.render(w, http.StatusUnprocessableEntity, "password.tmpl.html", data)
+    return
+  }
+
+  // id, err := app.snippets.Insert(form.Title, form.Content, form.Expires)
+  // if err != nil {
+  //   app.serverError(w, err)
+  //   return
+  // }
+
+  // app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
+
+  // http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
+  
+}
+
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
   params := httprouter.ParamsFromContext(r.Context())
   id, err := strconv.Atoi(params.ByName("id"))
